@@ -1,101 +1,107 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import React, { useState } from "react"
+import { Moon, Send, Sun, Star } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+
+export default function ChatGPTReplica() {
+  const [messages, setMessages] = useState([])
+  const [inputMessage, setInputMessage] = useState("")
+  const [isDarkTheme, setIsDarkTheme] = useState(false)
+
+  const suggestions = [
+    "Tell me a joke",
+    "What's the weather like?",
+    "How does AI work?",
+    "Recommend a book"
+  ]
+
+  const handleSendMessage = (message) => {
+    if (message.trim() === "") return
+
+    const newMessages = [
+      ...messages,
+      { content: message, sender: "user" },
+      { content: "This is a mock AI response.", sender: "ai" },
+    ]
+    setMessages(newMessages)
+    setInputMessage("")
+  }
+
+  const toggleTheme = () => {
+    setIsDarkTheme(!isDarkTheme)
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+    <div className={`h-screen flex flex-col ${isDarkTheme ? "dark" : ""}`}>
+      <div className="flex-1 bg-background text-foreground overflow-hidden">
+        <div className="container mx-auto p-4 flex flex-col h-full max-w-4xl">
+          <header className="flex justify-between items-center mb-4">
+            <h1 className="text-2xl font-bold flex items-center">
+              ChatGPT Replica
+              <Star className="h-5 w-5 ml-2 text-yellow-400" fill="currentColor" />
+            </h1>
+            <Button variant="ghost" size="icon" onClick={toggleTheme}>
+              {isDarkTheme ? <Sun className="h-[1.2rem] w-[1.2rem]" /> : <Moon className="h-[1.2rem] w-[1.2rem]" />}
+            </Button>
+          </header>
+          <ScrollArea className="flex-1 border rounded-md p-4 mb-4">
+            {messages.map((message, index) => (
+              <div key={index} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"} mb-4`}>
+                <div className={`flex items-start ${message.sender === "user" ? "flex-row-reverse" : ""}`}>
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={message.sender === "user" ? "/user-avatar.png" : "/ai-avatar.png"} />
+                    <AvatarFallback>{message.sender === "user" ? "U" : "AI"}</AvatarFallback>
+                  </Avatar>
+                  <div
+                    className={`mx-2 p-3 rounded-lg ${
+                      message.sender === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary text-secondary-foreground"
+                    }`}
+                  >
+                    {message.content}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </ScrollArea>
+          <div className="mb-4">
+            <h2 className="text-sm font-semibold mb-2">Suggestions:</h2>
+            <div className="flex flex-wrap gap-2">
+              {suggestions.map((suggestion, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSendMessage(suggestion)}
+                >
+                  {suggestion}
+                </Button>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center">
+            <Input
+              type="text"
+              placeholder="Type your message..."
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") handleSendMessage(inputMessage)
+              }}
+              className="flex-1 mr-2 rounded-full"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <Button onClick={() => handleSendMessage(inputMessage)} className="rounded-full">
+              <Send className="h-4 w-4 mr-2" />
+              Send
+            </Button>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
-  );
+  )
 }
