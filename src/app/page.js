@@ -1,11 +1,11 @@
 "use client"
 
-import React, { useState } from "react"
-import { Moon, Send, Sun, Star } from "lucide-react"
+import React, { useState, useRef, useEffect } from "react"
+import { Moon, Send, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import Image from "next/image"
 
 // Initial AI message
 const initialMessages = [
@@ -13,10 +13,13 @@ const initialMessages = [
 ]
 
 export default function ChatGPTReplica() {
-  const [messages, setMessages] = useState(initialMessages) // Initial message always present
+  const [messages, setMessages] = useState(initialMessages)
   const [inputMessage, setInputMessage] = useState("")
   const [isDarkTheme, setIsDarkTheme] = useState(false)
-  const [loading, setLoading] = useState(false) // To handle loading state for API call
+  const [loading, setLoading] = useState(false)
+
+  // Ref to the messages container for auto-scroll
+  const messagesEndRef = useRef(null)
 
   const suggestions = [
     "What is GarAi?",
@@ -24,6 +27,13 @@ export default function ChatGPTReplica() {
     "Where do you want to be in 5 years?",
     "What are some of your goals?",
   ]
+
+  // Auto-scroll to the bottom when new messages are added
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
+    }
+  }, [messages])
 
   const handleSendMessage = async (message) => {
     if (message.trim() === "") return
@@ -57,7 +67,7 @@ export default function ChatGPTReplica() {
   }
 
   const handleSuggestionClick = (suggestion) => {
-    setInputMessage(suggestion) // Fill the input with the suggestion, but don't send it
+    handleSendMessage(suggestion)
   }
 
   const toggleTheme = () => {
@@ -65,19 +75,20 @@ export default function ChatGPTReplica() {
   }
 
   return (
-    <div className={`h-screen flex flex-col ${isDarkTheme ? "dark" : ""}`}>
-      <div className="flex-1 bg-background text-foreground overflow-hidden">
-        <div className="container mx-auto p-4 flex flex-col h-full max-w-4xl">
+    <div className={`h-screen flex flex-col ${isDarkTheme ? "dark" : ""} font-sans`}>
+      <div className="flex-1 bg-background text-foreground overflow-hidden relative">
+        <img src='/transparent-bg.avif' className=" absolute top-0 left-0 object-cover h-[750px] z-0 pointer-events-none select-none opacity-50" />
+        <div className="container mx-auto px-3 pt-4 pb-6 flex flex-col h-full max-w-5xl z-10 relative">
           <header className="flex justify-between items-center mb-4">
-            <h1 className="text-2xl font-bold flex items-center">
+            <h1 className="text-2xl font-bold flex items-center ">
               GarAI
-              <Star className="h-5 w-5 ml-2 text-yellow-400" fill="currentColor" />
+              <Image src='/ai-icon.svg' className="ms-3" width={24} height={24}></Image>
             </h1>
             <Button variant="ghost" size="icon" onClick={toggleTheme}>
               {isDarkTheme ? <Sun className="h-[1.2rem] w-[1.2rem]" /> : <Moon className="h-[1.2rem] w-[1.2rem]" />}
             </Button>
           </header>
-          <ScrollArea className="flex-1 border rounded-md p-4 mb-4">
+          <div className="flex-1 border rounded-md p-4 mb-4 overflow-y-auto">
             {messages.map((message, index) => (
               <div key={index} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"} mb-4`}>
                 <div className={`flex items-start ${message.sender === "user" ? "flex-row-reverse" : ""}`}>
@@ -86,34 +97,54 @@ export default function ChatGPTReplica() {
                     <AvatarFallback>{message.sender === "user" ? "U" : "AI"}</AvatarFallback>
                   </Avatar>
                   <div
-                    className={`mx-2 p-3 rounded-lg ${
-                      message.sender === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary text-secondary-foreground"
-                    }`}
+                    className={`mx-2 p-3 rounded-lg ${message.sender === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-secondary-foreground"
+                      }`}
                   >
                     {message.content}
                   </div>
                 </div>
               </div>
             ))}
-          </ScrollArea>
-          <div className="mb-4">
+            {loading && (
+              <div className='flex mb-4'>
+                <div className='flex items-start' >
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src="/ai-avatar.png" />
+                    <AvatarFallback>AI</AvatarFallback>
+                  </Avatar>
+                  <div className="mx-2 p-3 rounded-lg bg-secondary text-secondary-foreground typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} /> {/* This will be used to scroll into view */}
+          </div>
+          <div className="mb-3">
             <h2 className="text-sm font-semibold mb-2">Suggestions:</h2>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-thin"
+              onWheel={(e) => {
+                e.currentTarget.scrollLeft += e.deltaY
+              }}
+            >
               {suggestions.map((suggestion, index) => (
                 <Button
+                  className="mb-1"
                   key={index}
                   variant="outline"
                   size="sm"
-                  onClick={() => handleSuggestionClick(suggestion)} // Just fills the input
+                  onClick={() => handleSuggestionClick(suggestion)}
                 >
                   {suggestion}
                 </Button>
               ))}
             </div>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center h-[45px]">
             <Input
               type="text"
               placeholder="Type your message..."
@@ -122,10 +153,10 @@ export default function ChatGPTReplica() {
               onKeyPress={(e) => {
                 if (e.key === "Enter" && !loading) handleSendMessage(inputMessage)
               }}
-              className="flex-1 mr-2 rounded-full"
-              disabled={loading} // Disable input when loading
+              className="flex-1 mr-2 rounded-full h-full"
+              disabled={loading}
             />
-            <Button onClick={() => handleSendMessage(inputMessage)} className="rounded-full" disabled={loading}>
+            <Button onClick={() => handleSendMessage(inputMessage)} className="rounded-full h-full" disabled={loading}>
               {loading ? "..." : <><Send className="h-4 w-4 mr-2" />Send</>}
             </Button>
           </div>
