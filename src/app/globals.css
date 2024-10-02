@@ -77,11 +77,21 @@ body {
   }
 }
 
-.scrollbar-thin::-webkit-scrollbar {
+.chat-scrollbar::-webkit-scrollbar {
+  height: 5px; 
+  width: 8px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #9196a0; /* Customize scrollbar color */
+  border-radius: 9999px; /* Make it more rounded */
+}
+
+.suggestion-scrollbar::-webkit-scrollbar {
   height: 5px; /* Customize scrollbar height */
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb {
+.suggestion-scrollbar::-webkit-scrollbar-thumb {
   background-color: #9196a0; /* Customize scrollbar color */
   border-radius: 9999px; /* Make it more rounded */
 }

@@ -18,17 +18,15 @@ export default function ChatGPTReplica() {
   const [isDarkTheme, setIsDarkTheme] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // Ref to the messages container for auto-scroll
   const messagesEndRef = useRef(null)
 
   const suggestions = [
     "What is GarAi?",
-    "What was your last role?",
+    "What is your current role?",
     "Where do you want to be in 5 years?",
     "What are some of your goals?",
   ]
 
-  // Auto-scroll to the bottom when new messages are added
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
@@ -75,20 +73,20 @@ export default function ChatGPTReplica() {
   }
 
   return (
-    <div className={`h-screen flex flex-col ${isDarkTheme ? "dark" : ""} font-sans`}>
+    <div className={`flex flex-col ${isDarkTheme ? "dark" : ""} font-sans h-screen overflow-hidden`}>
       <div className="flex-1 bg-background text-foreground overflow-hidden relative">
-        <img src='/transparent-bg.avif' className=" absolute top-0 left-0 object-cover h-[750px] z-0 pointer-events-none select-none opacity-50" />
-        <div className="container mx-auto px-3 pt-4 pb-6 flex flex-col h-full max-w-5xl z-10 relative">
+        <img src='/transparent-bg.avif' className=" absolute top-0 left-0 object-cover h-full z-0 pointer-events-none select-none opacity-50" />
+        <div className="container mx-auto p-4 flex flex-col h-full max-w-5xl z-10 relative">
           <header className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold flex items-center ">
               GarAI
-              <Image src='/ai-icon.svg' className="ms-3" width={24} height={24}></Image>
+              <img src='/ai-icon.svg' className="ms-3" width={24} height={24}></img>
             </h1>
             <Button variant="ghost" size="icon" onClick={toggleTheme}>
               {isDarkTheme ? <Sun className="h-[1.2rem] w-[1.2rem]" /> : <Moon className="h-[1.2rem] w-[1.2rem]" />}
             </Button>
           </header>
-          <div className="flex-1 border rounded-md p-4 mb-4 overflow-y-auto">
+          <div className="flex-1 p-4 mb-4 overflow-y-auto chat-scrollbar">
             {messages.map((message, index) => (
               <div key={index} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"} mb-4`}>
                 <div className={`flex items-start ${message.sender === "user" ? "flex-row-reverse" : ""}`}>
@@ -126,7 +124,7 @@ export default function ChatGPTReplica() {
           </div>
           <div className="mb-3">
             <h2 className="text-sm font-semibold mb-2">Suggestions:</h2>
-            <div className="flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-thin"
+            <div className="flex gap-2 overflow-x-auto whitespace-nowrap suggestion-scrollbar"
               onWheel={(e) => {
                 e.currentTarget.scrollLeft += e.deltaY
               }}
@@ -160,6 +158,7 @@ export default function ChatGPTReplica() {
               {loading ? "..." : <><Send className="h-4 w-4 mr-2" />Send</>}
             </Button>
           </div>
+          <p className="flex justify-center text-xs text-gray-400 mt-1">this is a demo that may make mistakes</p>
         </div>
       </div>
     </div>
