@@ -7,28 +7,57 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
+// Initial AI message
+const initialMessages = [
+  { content: "Hi, I’m GarAi, here to answer your questions as Garrett. Ask me anything about his skills, experience, or projects, and I’ll respond just like he would. Let’s chat!", sender: "ai" }
+]
+
 export default function ChatGPTReplica() {
-  const [messages, setMessages] = useState([])
+  const [messages, setMessages] = useState(initialMessages) // Initial message always present
   const [inputMessage, setInputMessage] = useState("")
   const [isDarkTheme, setIsDarkTheme] = useState(false)
+  const [loading, setLoading] = useState(false) // To handle loading state for API call
 
   const suggestions = [
-    "Tell me a joke",
-    "What's the weather like?",
-    "How does AI work?",
-    "Recommend a book"
+    "What is GarAi?",
+    "What was your last role?",
+    "Where do you want to be in 5 years?",
+    "What are some of your goals?",
   ]
 
-  const handleSendMessage = (message) => {
+  const handleSendMessage = async (message) => {
     if (message.trim() === "") return
 
-    const newMessages = [
-      ...messages,
-      { content: message, sender: "user" },
-      { content: "This is a mock AI response.", sender: "ai" },
-    ]
+    const newMessages = [...messages, { content: message, sender: "user" }]
     setMessages(newMessages)
     setInputMessage("")
+    setLoading(true)
+
+    try {
+      // Make a POST request to your backend
+      const response = await fetch("https://garai-backend-production.up.railway.app/ask-ai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          question: message
+        })
+      })
+      const data = await response.json()
+
+      // Update messages with AI's response
+      setMessages([...newMessages, { content: data.answer, sender: "ai" }])
+    } catch (error) {
+      console.error("Error fetching AI response:", error)
+      setMessages([...newMessages, { content: "Sorry, something went wrong.", sender: "ai" }])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSuggestionClick = (suggestion) => {
+    setInputMessage(suggestion) // Fill the input with the suggestion, but don't send it
   }
 
   const toggleTheme = () => {
@@ -41,7 +70,7 @@ export default function ChatGPTReplica() {
         <div className="container mx-auto p-4 flex flex-col h-full max-w-4xl">
           <header className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold flex items-center">
-              ChatGPT Replica
+              GarAI
               <Star className="h-5 w-5 ml-2 text-yellow-400" fill="currentColor" />
             </h1>
             <Button variant="ghost" size="icon" onClick={toggleTheme}>
@@ -77,7 +106,7 @@ export default function ChatGPTReplica() {
                   key={index}
                   variant="outline"
                   size="sm"
-                  onClick={() => handleSendMessage(suggestion)}
+                  onClick={() => handleSuggestionClick(suggestion)} // Just fills the input
                 >
                   {suggestion}
                 </Button>
@@ -91,13 +120,13 @@ export default function ChatGPTReplica() {
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={(e) => {
-                if (e.key === "Enter") handleSendMessage(inputMessage)
+                if (e.key === "Enter" && !loading) handleSendMessage(inputMessage)
               }}
               className="flex-1 mr-2 rounded-full"
+              disabled={loading} // Disable input when loading
             />
-            <Button onClick={() => handleSendMessage(inputMessage)} className="rounded-full">
-              <Send className="h-4 w-4 mr-2" />
-              Send
+            <Button onClick={() => handleSendMessage(inputMessage)} className="rounded-full" disabled={loading}>
+              {loading ? "..." : <><Send className="h-4 w-4 mr-2" />Send</>}
             </Button>
           </div>
         </div>
