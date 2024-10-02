@@ -73,7 +73,7 @@ export default function ChatGPTReplica() {
   }
 
   return (
-    <div className={`flex flex-col ${isDarkTheme ? "dark" : ""} font-sans h-screen overflow-hidden`}>
+    <div className={`flex flex-col ${isDarkTheme ? "dark" : ""} font-sans h-[100svh] overflow-hidden`}>
       <div className="flex-1 bg-background text-foreground overflow-hidden relative">
         <img src='/transparent-bg.avif' className=" absolute top-0 left-0 object-cover h-full z-0 pointer-events-none select-none opacity-50" />
         <div className="container mx-auto p-4 flex flex-col h-full max-w-5xl z-10 relative">
