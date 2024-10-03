@@ -14,8 +14,8 @@ const geistMono = localFont({
 });
 
 export const metadata = {
-  title: "GarAi",
-  description: "GarAi - An AI assistant for quick insights into Garrett's skills, projects, and experience.",
+  title: "GarAi - Your Smart AI Assistant by Garrett",
+  description: "Discover GarAi, the AI assistant built to provide quick insights into Garrett's skills, projects, and experience. Chat now and explore the future of intelligent conversations.",
 };
 
 export default function RootLayout({ children }) {
