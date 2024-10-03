@@ -86,7 +86,7 @@ export default function ChatGPTReplica() {
               {isDarkTheme ? <Sun className="h-[1.2rem] w-[1.2rem]" /> : <Moon className="h-[1.2rem] w-[1.2rem]" />}
             </Button>
           </header>
-          <div className="flex-1 p-4 mb-4 overflow-y-auto chat-scrollbar">
+          <div className="flex-1 p-4 overflow-y-auto chat-scrollbar">
             {messages.map((message, index) => (
               <div key={index} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"} mb-4`}>
                 <div className={`flex items-start ${message.sender === "user" ? "flex-row-reverse" : ""}`}>
