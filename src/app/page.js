@@ -7,19 +7,20 @@ import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Image from "next/image"
 
-// Initial AI message
+// Initial messages
 const initialMessages = [
   { content: "Hi, I’m GarAi, here to answer your questions as Garrett. Ask me anything about his skills, experience, or projects, and I’ll respond just like he would. Let’s chat!", sender: "ai" }
 ]
 
-export default function ChatGPTReplica() {
-  const [messages, setMessages] = useState(initialMessages)
+export default function GarAi() {
+  const [messages, setMessages] = useState([])
   const [inputMessage, setInputMessage] = useState("")
   const [isDarkTheme, setIsDarkTheme] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const messagesEndRef = useRef(null)
 
+  // Suggestions
   const suggestions = [
     "What is GarAi?",
     "What is your current role?",
@@ -27,12 +28,31 @@ export default function ChatGPTReplica() {
     "What are some of your goals?",
   ]
 
+  // Load messages from localStorage
+  useEffect(() => {
+    const savedMessages = localStorage.getItem("chatMessages")
+    if (savedMessages) {
+      setMessages(JSON.parse(savedMessages))
+    } else {
+      setMessages(initialMessages)
+    }
+  }, [])
+
+  // Save messages to localStorage
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem("chatMessages", JSON.stringify(messages))
+    }
+  }, [messages])
+
+  // Scrolls to bottom of messages
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
     }
   }, [messages])
 
+  // Handle sending a message
   const handleSendMessage = async (message) => {
     if (message.trim() === "") return
 
@@ -42,7 +62,7 @@ export default function ChatGPTReplica() {
     setLoading(true)
 
     try {
-      // Make a POST request to your backend
+      // POST request to AI endpoint
       const response = await fetch("https://garai-backend-production.up.railway.app/ask-ai", {
         method: "POST",
         headers: {
@@ -58,16 +78,18 @@ export default function ChatGPTReplica() {
       setMessages([...newMessages, { content: data.answer, sender: "ai" }])
     } catch (error) {
       console.error("Error fetching AI response:", error)
-      setMessages([...newMessages, { content: "Sorry, something went wrong.", sender: "ai" }])
+      setMessages([...newMessages, { content: "Sorry, something went wrong. Please try again later.", sender: "ai" }])
     } finally {
       setLoading(false)
     }
   }
 
+  // Handle suggestion click
   const handleSuggestionClick = (suggestion) => {
     handleSendMessage(suggestion)
   }
 
+  // Toggle theme
   const toggleTheme = () => {
     setIsDarkTheme(!isDarkTheme)
   }
