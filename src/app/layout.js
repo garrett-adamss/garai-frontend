@@ -15,7 +15,7 @@ const geistMono = localFont({
 
 export const metadata = {
   title: "GarAi",
-  description: "GarAi - AI Chatbot developed by Garrett",
+  description: "GarAi - An AI assistant for quick insights into Garrett's skills, projects, and experience.",
 };
 
 export default function RootLayout({ children }) {
